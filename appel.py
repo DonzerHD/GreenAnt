@@ -30,9 +30,11 @@ print(Action_par_personne(1))
 # Association_delete()
 
 def ordre_d_achat(utilisateur_id, action_id, prix_achat, date_achat):
-      curseur.execute("""INSERT INTO Associations_actions_utilisateurs (utilisateur_id, action_id, prix_achat, date_achat)
+    connexion = sqlite3.connect('base.db')
+    curseur = connexion.cursor()
+    curseur.execute("""INSERT INTO Associations_actions_utilisateurs (utilisateur_id, action_id, prix_achat, date_achat)
                     VALUES (?, ?, ?, ? )""", (utilisateur_id, action_id, prix_achat, date_achat))
-      connexion.commit()
+    connexion.commit()
       
 def ordre_vente(id , prix_vente, date_vente):
       curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? """, (prix_vente, date_vente , id))
