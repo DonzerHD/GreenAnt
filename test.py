@@ -1,13 +1,20 @@
 from typing import Union
 from fastapi import FastAPI
+import sqlite3
+from appel import *
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/actions")
+def read_actions_all():
+    actions = Action_all()
+    return actions
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int):
-    list_a = ["aa", "bb", "cc"]
-    return {"item_id": item_id , "item": list_a[item_id-1]}
+@app.get("/actions/{id}")
+def read_actions_par_personne(id: int):
+    actions = Action_par_personne(id)
+    #return actions
+    return {"actions": actions}
+
+
+

@@ -25,6 +25,7 @@ curseur.execute("""CREATE TABLE Actions (
                 )""")
 
 curseur.execute("""CREATE TABLE Associations_actions_utilisateurs (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
                   utilisateur_id INTEGER,
                   action_id INTEGER,
                   prix_achat INTEGER,
