@@ -18,21 +18,23 @@ curseur.execute("""CREATE TABLE Associations_suivi_suiveur (
                     FOREIGN KEY (suiveur) REFERENCES Utilisateurs(id)
                 )""")
 
-curseur.execute("""CREATE TABLE Entreprises (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-                    nom TEXT,
-                    capital INTEGER
-                )""")
-
 curseur.execute("""CREATE TABLE Actions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-                    nom TEXT,
-                    valeur INTEGER,
-                    utilisateur_id INTEGER,
-                    entreprise_id INTEGER,
-                    FOREIGN KEY (utilisateur_id) REFERENCES Utilisateurs(id),
-                    FOREIGN KEY (entreprise_id) REFERENCES Entreprises(id)
+                    entreprise TEXT,
+                    prix INTEGER
                 )""")
+
+curseur.execute("""CREATE TABLE Associations_actions_utilisateurs (
+                  utilisateur_id INTEGER,
+                  action_id INTEGER,
+                  prix_achat INTEGER,
+                  date_achat TEXT,
+                  prix_vente INTEGER,
+                  date_vente TEXT,
+                  FOREIGN KEY (utilisateur_id) REFERENCES Utilisateurs(id),
+                  FOREIGN KEY (action_id) REFERENCES Actions(id)
+                )""")
+
 
 connexion.commit()
 connexion.close()
