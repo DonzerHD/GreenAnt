@@ -187,6 +187,12 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
 
 # Delete :
 # - Supprimer une action
+
+class Action(BaseModel):
+    id:int
+    
+@app.delete("/supprimer_action/")
+
 # - Supprimer un utilisateur 
 
 class User(BaseModel):
@@ -222,6 +228,8 @@ def stop_relation(supp_relation: SupprimerRelation,req:Request):
         return {"La relation a bien été supprimée"}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+
+    
 
 
 
