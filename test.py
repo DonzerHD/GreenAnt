@@ -151,6 +151,12 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
 
 # Delete :
 # - Supprimer une action
+
+class Action(BaseModel):
+    id:int
+    
+@app.delete("/supprimer_action/")
+
 # - Supprimer un utilisateur 
 
 class User(BaseModel):
@@ -189,18 +195,6 @@ def stop_relation(supp_relation: SupprimerRelation,req:Request):
 
     
 
-# Login - renvoie le token
-
-class UserLogin(BaseModel):
-    email: str
-    mdp: str
-    
-@app.post("/api/auth/login")
-async def login(user: UserLogin):
-    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
-    if token is None:
-        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
-    return {"token": token[0]}
 
 
 
