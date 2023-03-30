@@ -69,6 +69,8 @@ def create_ordre_d_achat(ordre: OrdreAchat):
     ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat)
     return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat}
 
+class OrdreVente(BaseModel):
+    prix_vente: int
 
 class OrdreVente(BaseModel):
     id:int
@@ -82,7 +84,7 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
         return {"action_id": ordre.id, "prix_vente":ordre.prix_vente}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
-
+    
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
     if len(get_users_by_mail(user.email)) > 0:
@@ -98,6 +100,7 @@ async def inscription(user:UserRegister):
         return {"token" : token}
     
 
+
 class Suivi(BaseModel):
     email:str
     
@@ -110,3 +113,13 @@ async def suivre(suivi:Suivi,req:Request):
         return {"La relation suiveur-suivi a bien été créée"}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+class UserLogin(BaseModel):
+    email: str
+    mdp: str
+
+@app.post("/api/auth/login")
+async def login(user: UserLogin):
+    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
+    if token is None:
+        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
+    return {"token": token[0]}

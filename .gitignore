@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+.basedb
 # Distribution / packaging
 .Python
 build/
@@ -81,7 +81,7 @@ ipython_config.py
 
 # pyenv
 .python-version
-
+.db
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
 #   However, in case of collaboration, if having platform-specific dependencies or dependencies
@@ -126,4 +126,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5c35f024c02730bd3ea3eda81292b89321dd71e1
 base.db
