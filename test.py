@@ -131,7 +131,43 @@ async def suivre(suivi:Suivi,req:Request):
 
 
 # Update :
-# - Changement de mail, JWT, MDP
+# - Changement de mail 
+class UpdateEmail(BaseModel):
+    email:str
+@app.put("/update_email")
+async def update_email(update:UpdateEmail,req:Request):
+    try:
+        decode = decoder_token(req.headers["Authorization"])
+        id = decode["id"]
+        modifier_mail(id,update.email)
+        return {"email": update.email}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+# - Changement JWT
+class UpdateToken(BaseModel):
+    token:str
+@app.put("/update_token")
+async def update_token_utilisateur(update:UpdateToken,req:Request):
+    try:
+        decode = decoder_token(req.headers["Authorization"])
+        id = decode["id"]
+        update_token(id,update.token)
+        return {"token": update.token}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+# - Changement de mot de passe
+class UpdateMdp(BaseModel):
+    mdp:str
+@app.put("/update_mdp")
+async def update_mdp_utilisateur(update:UpdateMdp,req:Request):
+    try:
+        decode = decoder_token(req.headers["Authorization"])
+        id = decode["id"]
+        modifier_mdp(id,hasher_mdp(update.mdp))
+        return {"mdp": update.mdp}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+
 # - vendre une action 
 
 class OrdreVente(BaseModel):
@@ -187,20 +223,6 @@ def stop_relation(supp_relation: SupprimerRelation,req:Request):
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
 
-    
-
-# Login - renvoie le token
-
-class UserLogin(BaseModel):
-    email: str
-    mdp: str
-    
-@app.post("/api/auth/login")
-async def login(user: UserLogin):
-    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
-    if token is None:
-        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
-    return {"token": token[0]}
 
 
 
