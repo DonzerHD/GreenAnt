@@ -95,3 +95,14 @@ async def inscription(user:UserRegister):
         }, SECRET_KEY, algorithm=ALGORITHM)
         update_token(id_user, token)
         return {"token" : token}
+
+class UserLogin(BaseModel):
+    email: str
+    mdp: str
+
+@app.post("/api/auth/login")
+async def login(user: UserLogin):
+    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
+    if token is None:
+        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
+    return {"token": token[0]}
