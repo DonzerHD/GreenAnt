@@ -70,17 +70,18 @@ def create_ordre_d_achat(ordre: OrdreAchat):
     ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat, ordre.date_achat)
     return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat, "date_achat": ordre.date_achat}
 
+class OrdreVente(BaseModel):
+    prix_vente: int
 
-
-@app.put("/ordre_de_vente")
-def create_ordre_de_vente(id, prix_vente,req:Request):
+@app.put("/ordre_de_vente/{id}")
+def update_ordre_de_vente(id: int, ordre: OrdreVente, req: Request):
     try:
         decoder_token(req.headers["Authorization"])
-        ordre_vente(id,prix_vente)
-        return {"action_id": id, "prix_vente":prix_vente}
+        ordre_vente(id, ordre.prix_vente)
+        return {"action_id": id, "prix_vente": ordre.prix_vente}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
-
+    
 @app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
     if len(get_users_by_mail(user.email)) > 0:
