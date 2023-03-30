@@ -23,8 +23,6 @@ def obtenir_jwt_depuis_email_mdp(email:str, mdp:str):
     connexion.close()
     return resultat
 
-# - vérifier la validité du JWT
-
 
 # - voir ses actions
 
@@ -54,14 +52,14 @@ def voir_actions_personnes_suivi(suiveur_id):
     return actions
 
 
-# Obtenir l'id d'un utilisateur depuis son mail et son JWT   A FAIRE
+# Obtenir l'id d'un utilisateur depuis son mail et son JWT
 
-def get_id_user_by_email(email:str):
+def get_id_user_by_email_and_jwt(email:str, jwt:str):
     connexion = sqlite3.connect("base.db")
     curseur = connexion.cursor()
     curseur.execute("""
-                    SELECT id FROM Utilisateurs WHERE email=?
-                    """, (email,))
+                    SELECT id FROM Utilisateurs WHERE email=? AND jwt=?
+                    """, (email, jwt))
     resultat = curseur.fetchone()
     connexion.close()
     return resultat
@@ -130,7 +128,7 @@ def suivre_utilisateur(email, suiveur_id):
 def modifier_mail(id:int, nouveau_mail)->None:
     connexion = sqlite3.connect("base.db")
     curseur = connexion.cursor()
-    
+
     curseur.execute("""
                    UPDATE utilisateurs 
                    SET email = ?
