@@ -125,17 +125,32 @@ def suivre_utilisateur(email, suiveur_id):
 
 # Update :
 
-# - Changement de mail, JWT, MDP     A FAIRE
+# - Changement de mail
 
-def modifier_utilisateur(id:int,nouveau_nom:str,nouveau_prenom, nouveau_mail, nouveau_mdp)->None:
+def modifier_mail(id:int, nouveau_mail)->None:
     connexion = sqlite3.connect("base.db")
     curseur = connexion.cursor()
     
     curseur.execute("""
                    UPDATE utilisateurs 
-                   SET nom =  ?, prenom = ?, email = ?, mdp = ?
+                   SET email = ?
                    WHERE id = ?
-                   """, (nouveau_nom,nouveau_prenom, nouveau_mail, nouveau_mdp, id))
+                   """, (nouveau_mail, id))
+    
+    connexion.commit()
+    connexion.close()
+
+# Changement de mot de passe
+
+def modifier_mdp(id:int, nouveau_mdp)->None:
+    connexion = sqlite3.connect("base.db")
+    curseur = connexion.cursor()
+    
+    curseur.execute("""
+                UPDATE utilisateurs 
+                SET mdp = ?
+                WHERE id = ?
+                """, (nouveau_mdp, id))
     
     connexion.commit()
     connexion.close()
@@ -162,10 +177,24 @@ def ordre_vente(id , prix_vente):
 
 # Changer la valeur d’une action (fonction prix)
 
+def modifier_valeur_action(id,nouvelle_valeur):
+    connexion = sqlite3.connect('base.db')
+    curseur = connexion.cursor()
+    curseur.execute("""UPDATE Actions SET valeur = ? WHERE id = ? """, (nouvelle_valeur, id))
+    connexion.commit()
+
 # Delete:
 
 # - Supprimer une action
 
+def supprimer_action(id):
+    connexion = sqlite3.connect('base.db')
+    curseur = connexion.cursor()
+
+    curseur.execute("""DELETE FROM Actions 
+                    WHERE id = ?""", (id,))
+    connexion.commit()
+    connexion.close()
 
 # - Supprimer un utilisateur 
 
@@ -188,7 +217,7 @@ def supprimer_relation(email, suiveur_id):
     # Supprimer la relation suivi-suiveur correspondante
     curseur.execute("""
                     DELETE FROM Associations_suivi_suiveur 
-                    WHERE suivi_id = ?,suiveur_id = ? """,(suivi_id,suiveur_id))
+                    WHERE suivi = ? AND suiveur = ? """,(suivi_id,suiveur_id))
     
     connexion.commit()
 

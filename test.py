@@ -140,10 +140,43 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
 # Delete :
 # - Supprimer une action
 # - Supprimer un utilisateur 
+
+class User(BaseModel):
+    email: str
+    mdp: str
+
+
+@app.delete("/supprimer_utilisateur/")
+def supprimer_user(user: User,req:Request):
+    try : 
+        decoder_token(req.headers["Authorization"])
+        token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
+        if token is None:
+            raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
+        else :
+            supprimer_utilisateur(user.email)
+            return {"L'utilisateur a bien été supprimé"}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+
 # - arrêté de suivre 
 
+class SupprimerRelation(BaseModel):
+    email:str
+
+
+@app.delete("/stop_relation/")
+def stop_relation(supp_relation: SupprimerRelation,req:Request):
+    try : 
+        decode = decoder_token(req.headers["Authorization"])
+        suiveur_id = decode["id"]
+        supprimer_relation(supp_relation.email, suiveur_id)
+        return {"La relation a bien été supprimée"}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
 
     
+
 # Login - renvoie le token
 
 class UserLogin(BaseModel):
