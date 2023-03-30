@@ -119,7 +119,7 @@ def create_ordre_d_achat(ordre: OrdreAchat):
 class Suivi(BaseModel):
     email:str
     
-@app.post("/api/suivre")
+@app.post("/suivre")
 async def suivre(suivi:Suivi,req:Request):
     try:
         decode = decoder_token(req.headers["Authorization"])
@@ -224,27 +224,31 @@ def stop_relation(supp_relation: SupprimerRelation,req:Request):
     try : 
         decode = decoder_token(req.headers["Authorization"])
         suiveur_id = decode["id"]
+        
+        # Vérifier si la relation existe avant de la supprimer
+        connexion = sqlite3.connect('base.db')
+        curseur = connexion.cursor()
+        curseur.execute("""
+            SELECT id FROM Utilisateurs WHERE email=?
+        """, (supp_relation.email,))
+        suivi = curseur.fetchone()
+        if suivi is None:
+            connexion.close()
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+        
+        curseur.execute("""
+            SELECT suivi FROM Associations_suivi_suiveur WHERE suiveur=? AND suivi=?
+        """, (suiveur_id, suivi[0]))
+        relation = curseur.fetchone()
+        if relation is None:
+            connexion.close()
+            raise HTTPException(status_code=404, detail="Relation non trouvée")
+        
         supprimer_relation(supp_relation.email, suiveur_id)
+        connexion.close()
         return {"La relation a bien été supprimée"}
-    except:
-        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
-
-    
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    
-
-
-
-
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print("Une erreur inattendue s'est produite : ", e)
+        raise HTTPException(status_code=500, detail="Une erreur inattendue s'est produite")
