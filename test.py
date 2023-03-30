@@ -2,6 +2,8 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi import FastAPI, HTTPException, Request, Depends
 import sqlite3
+
+from pydantic import BaseModel
 from appel import *
 from pydantic import BaseModel
 import hashlib
@@ -42,14 +44,21 @@ def read_actions_par_personne(id: int):
     #return actions
     return {"actions": actions}
 
+class OrdreAchat(BaseModel):
+    utilisateur_id: int
+    action_id: int
+    prix_achat: int
+    date_achat: str
 class UserRegister(BaseModel):
     nom:str
     prenom:str
     email:str
     mdp:str
 
-
-@app.post("/api/auth/inscription")
+@app.post("/ordre_d_achat")
+def create_ordre_d_achat(ordre: OrdreAchat):
+    ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat, ordre.date_achat)
+    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat, "date_achat": ordre.date_achat}@app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
     if len(get_users_by_mail(user.email)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
