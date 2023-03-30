@@ -18,6 +18,14 @@ def read_actions_par_personne(id: int):
     #return actions
     return {"actions": actions}
 
+class Action(BaseModel):
+    entreprise: str
+    prix: int
+@app.post("/create_action")
+def create_action(action : Action):
+    Actions(action.entreprise, action.prix)
+    return {"entreprise": action.entreprise, "prix": action.prix}
+
 class OrdreAchat(BaseModel):
     utilisateur_id: int
     action_id: int
