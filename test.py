@@ -57,7 +57,6 @@ class OrdreAchat(BaseModel):
     utilisateur_id: int
     action_id: int
     prix_achat: int
-    date_achat: str
     
 class UserRegister(BaseModel):
     nom:str
@@ -67,17 +66,20 @@ class UserRegister(BaseModel):
 
 @app.post("/ordre_d_achat")
 def create_ordre_d_achat(ordre: OrdreAchat):
-    ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat, ordre.date_achat)
-    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat, "date_achat": ordre.date_achat}
+    ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat)
+    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat}
 
 
-
-@app.put("/ordre_de_vente")
-def create_ordre_de_vente(id, prix_vente,req:Request):
+class OrdreVente(BaseModel):
+    id:int
+    prix_vente:int 
+    
+@app.put("/ordre_de_vente/")
+def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
     try:
         decoder_token(req.headers["Authorization"])
-        ordre_vente(id,prix_vente)
-        return {"action_id": id, "prix_vente":prix_vente}
+        ordre_vente(ordre.id, ordre.prix_vente)
+        return {"action_id": ordre.id, "prix_vente":ordre.prix_vente}
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
 
@@ -94,3 +96,17 @@ async def inscription(user:UserRegister):
         }, SECRET_KEY, algorithm=ALGORITHM)
         update_token(id_user, token)
         return {"token" : token}
+    
+
+class Suivi(BaseModel):
+    email:str
+    
+@app.post("/api/suivre")
+async def suivre(suivi:Suivi,req:Request):
+    try:
+        decode = decoder_token(req.headers["Authorization"])
+        suiveur_id = decode["id"]
+        suivre_utilisateur(suivi.email,suiveur_id)
+        return {"La relation suiveur-suivi a bien été créée"}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")

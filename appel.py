@@ -43,7 +43,7 @@ def creer_utilisateur(nom, prenom, email, mdp,jwt):
     connexion.close()
     return id_user
     
-# creer_utilisateur('Poppins','Mary','mary@poppins.fr','parapluie')
+# creer_utilisateur('Poppins','Mary','mary@poppins.fr','parapluie','djdj')
 
 # Créer une action 
 
@@ -94,7 +94,7 @@ def Association_delete(id):
     curseur.execute("""DELETE FROM Associations_actions_utilisateurs WHERE utilisateur_id = ? """,(id,))
     connexion.commit()
     
-Association_delete(1)
+# Association_delete(1)
 
 # Placer un ordre d'achat (== créer une association action-utilisateur)
 def ordre_d_achat(utilisateur_id, action_id, prix_achat):
@@ -104,7 +104,7 @@ def ordre_d_achat(utilisateur_id, action_id, prix_achat):
                     VALUES (?, ?, ?, ? )""", (utilisateur_id, action_id, prix_achat,datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")))
     connexion.commit()
     
-ordre_d_achat(1,1,30)
+# ordre_d_achat(1,1,30)
 
 # Placer un ordre de vente (== modifier une assocaition action-utilisateur)
 def ordre_vente(id , prix_vente):
@@ -171,6 +171,8 @@ def obtenir_jwt_depuis_email_mdp(email:str, mdp:str):
     connexion.close()
     return resultat
 
+# print(obtenir_jwt_depuis_email_mdp('mary@poppins.fr','parapluie'))
+
 
 def get_users_by_mail(mail:str):
     connexion = sqlite3.connect("base.db")
@@ -182,6 +184,7 @@ def get_users_by_mail(mail:str):
     connexion.close()
     return resultat
 
+
 def get_id_user_by_email(email:str):
     connexion = sqlite3.connect("base.db")
     curseur = connexion.cursor()
@@ -191,6 +194,8 @@ def get_id_user_by_email(email:str):
     resultat = curseur.fetchone()
     connexion.close()
     return resultat
+
+# print(get_id_user_by_email('mary@poppins.fr'))
 
 def update_token(id, token:str)->None:
     connexion = sqlite3.connect("base.db")
