@@ -9,7 +9,8 @@ curseur.execute("""CREATE TABLE Utilisateurs (
                  nom TEXT,
                 prenom TEXT,
                 email TEXT,
-                mdp TEXT)""")
+                mdp TEXT,
+                jwt TEXT)""")
 
 curseur.execute("""CREATE TABLE Associations_suivi_suiveur (
                     suiveur INTEGER,
