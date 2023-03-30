@@ -56,7 +56,7 @@ async def login(user: UserLogin):
     return {"token": token[0]}
 
 
-# - voir ses actions A FAIRE 
+# - voir ses actions 
 
 @app.get("/actions/personne")
 def read_actions_par_personne(req:Request):
@@ -64,8 +64,20 @@ def read_actions_par_personne(req:Request):
     id = decode["id"]
     actions = Action_par_personne(id)
     return {"actions": actions}
+
 # - voir les actions des personnes que l’on suit
-# - obtenir l'id d'un utilisateur depuis son mail et son JWT
+
+
+@app.get("/actions_personnes_suivies")
+def actions_personnes_suivies(req:Request):
+    try:
+        decode = decoder_token(req.headers["Authorization"])
+        suiveur_id = decode["id"]
+        actions = voir_actions_personnes_suivi(suiveur_id)
+        return {"actions" : actions}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+
 
 # Create : 
 # - Créer un utilisateur
@@ -119,7 +131,7 @@ def create_ordre_d_achat(ordre: OrdreAchat):
 class Suivi(BaseModel):
     email:str
     
-@app.post("/api/suivre")
+@app.post("/suivre")
 async def suivre(suivi:Suivi,req:Request):
     try:
         decode = decoder_token(req.headers["Authorization"])
@@ -183,15 +195,8 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
     except:
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
     
-# - Changer la valeur d’une action (fonction prix)
 
 # Delete :
-# - Supprimer une action
-
-class Action(BaseModel):
-    id:int
-    
-@app.delete("/supprimer_action/")
 
 # - Supprimer un utilisateur 
 
