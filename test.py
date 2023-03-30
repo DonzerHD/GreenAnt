@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from appel import *
 from pydantic import BaseModel
 import hashlib
-from jose import jwt
+from jose import JWTError, jwt
 
 app = FastAPI()
 
@@ -22,10 +22,13 @@ def hasher_mdp(mdp:str) -> str:
     return hashlib.sha256(mdp.encode()).hexdigest()
 
 def decoder_token(token:str)->dict:
-    return jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+    try:
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return decoded_token
+    # vérifier que le token est valide
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Le token fourni est invalide ou a expiré")
 
-def verifier_token(req: Request):
-    token = req.headers["Authorization"]
     
 # Read :
 # - selectionner les actions disponibles 
@@ -40,18 +43,27 @@ def read_actions_all(req:Request):
         raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
     
 # - obtenir le JWT avec le mail et le MDP
-# - vérifier la validité du JWT
 
+class UserLogin(BaseModel):
+    email: str
+    mdp: str
+    
+@app.post("/api/auth/login")
+async def login(user: UserLogin):
+    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
+    if token is None:
+        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
+    return {"token": token[0]}
 
 
 # - voir ses actions A FAIRE 
 
-@app.get("/actions/{id}")
-def read_actions_par_personne(id: int):
+@app.get("/actions/personne")
+def read_actions_par_personne(req:Request):
+    decode = decoder_token(req.headers["Authorization"])
+    id = decode["id"]
     actions = Action_par_personne(id)
-    #return actions
     return {"actions": actions}
-
 # - voir les actions des personnes que l’on suit
 # - obtenir l'id d'un utilisateur depuis son mail et son JWT
 
@@ -141,21 +153,6 @@ def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
 # - Supprimer une action
 # - Supprimer un utilisateur 
 # - arrêté de suivre 
-
-
-    
-# Login - renvoie le token
-
-class UserLogin(BaseModel):
-    email: str
-    mdp: str
-    
-@app.post("/api/auth/login")
-async def login(user: UserLogin):
-    token = obtenir_jwt_depuis_email_mdp(user.email, hasher_mdp(user.mdp))
-    if token is None:
-        raise HTTPException(status_code=401, detail="Une erreur s'est produite lors de la génération du token")
-    return {"token": token[0]}
 
 
 
