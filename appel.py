@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 connexion = sqlite3.connect('base.db')
 curseur = connexion.cursor()
@@ -31,14 +32,16 @@ print(Action_par_personne(1))
 
 
 # Créer un utilisateur 
-def creer_utilisateur(nom, prenom, email, mdp):
+def creer_utilisateur(nom, prenom, email, mdp,jwt):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
 
-    curseur.execute("""INSERT INTO Utilisateurs (nom, prenom, email, mdp)
-                    VALUES (?, ?, ?, ?)""", (nom, prenom, email, mdp))
+    curseur.execute("""INSERT INTO Utilisateurs (nom, prenom, email, mdp, jwt)
+                    VALUES (?, ?, ?, ?,?)""", (nom, prenom, email, mdp,jwt))
+    id_user = curseur.lastrowid
     connexion.commit()
     connexion.close()
+    return id_user
     
 # creer_utilisateur('Poppins','Mary','mary@poppins.fr','parapluie')
 
@@ -98,14 +101,14 @@ def ordre_d_achat(utilisateur_id, action_id, prix_achat, date_achat):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
     curseur.execute("""INSERT INTO Associations_actions_utilisateurs (utilisateur_id, action_id, prix_achat, date_achat)
-                    VALUES (?, ?, ?, ? )""", (utilisateur_id, action_id, prix_achat, date_achat))
+                    VALUES (?, ?, ?, ? )""", (utilisateur_id, action_id, prix_achat,datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")))
     connexion.commit()
 
 # Placer un ordre de vente (== modifier une assocaition action-utilisateur)
 def ordre_vente(id , prix_vente, date_vente):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
-    curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? """, (prix_vente, date_vente , id))
+    curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? """, (prix_vente, datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S") , id))
     connexion.commit()
       
 # ordre_vente(1, 200, "2020-01-01")
@@ -153,3 +156,47 @@ def voir_actions_personnes_suivi(suiveur_id):
     return actions
 
 # print(voir_actions_personnes_suivi(1))
+
+# Authentification 
+
+def obtenir_jwt_depuis_email_mdp(email:str, mdp:str):
+    connexion = sqlite3.connect("base.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT jwt FROM Utilisateurs WHERE email=? AND mdp=?
+                    """, (email, mdp))
+    resultat = curseur.fetchone()
+    connexion.close()
+    return resultat
+
+
+def get_users_by_mail(mail:str):
+    connexion = sqlite3.connect("base.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT * FROM Utilisateurs WHERE email=?
+                    """, (mail,))
+    resultat = curseur.fetchall()
+    connexion.close()
+    return resultat
+
+def get_id_user_by_email(email:str):
+    connexion = sqlite3.connect("base.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    SELECT id FROM Utilisateurs WHERE email=?
+                    """, (email,))
+    resultat = curseur.fetchone()
+    connexion.close()
+    return resultat
+
+def update_token(id, token:str)->None:
+    connexion = sqlite3.connect("base.db")
+    curseur = connexion.cursor()
+    curseur.execute("""
+                    UPDATE Utilisateurs
+                        SET jwt = ?
+                        WHERE id=?
+                    """,(token, id))
+    connexion.commit()
+    connexion.close()
