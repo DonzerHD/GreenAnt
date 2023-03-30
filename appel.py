@@ -54,7 +54,7 @@ def Actions(entreprise, prix):
                     VALUES (?, ?)""", (entreprise, prix))
     connexion.commit()
 
-# Actions('simplon',50000)
+# Actions('Microsoft',3000)
     
 # Supprimer un utilisateur à partir de son mail 
 def supprimer_utilisateur(email):
@@ -97,21 +97,23 @@ def Association_delete(id):
 Association_delete(1)
 
 # Placer un ordre d'achat (== créer une association action-utilisateur)
-def ordre_d_achat(utilisateur_id, action_id, prix_achat, date_achat):
+def ordre_d_achat(utilisateur_id, action_id, prix_achat):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
     curseur.execute("""INSERT INTO Associations_actions_utilisateurs (utilisateur_id, action_id, prix_achat, date_achat)
                     VALUES (?, ?, ?, ? )""", (utilisateur_id, action_id, prix_achat,datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")))
     connexion.commit()
+    
+ordre_d_achat(1,1,30)
 
 # Placer un ordre de vente (== modifier une assocaition action-utilisateur)
-def ordre_vente(id , prix_vente, date_vente):
+def ordre_vente(id , prix_vente):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
     curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? """, (prix_vente, datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S") , id))
     connexion.commit()
       
-# ordre_vente(1, 200, "2020-01-01")
+# ordre_vente(1, 200)
 
 # Suivre un utilisateur à partir de son email (== créer une assocaition suivi-suiveur)
 def suivre_utilisateur(email, suiveur_id):

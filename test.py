@@ -47,6 +47,7 @@ def read_actions_par_personne(id: int):
 class Action(BaseModel):
     entreprise: str
     prix: int
+    
 @app.post("/create_action")
 def create_action(action : Action):
     Actions(action.entreprise, action.prix)
@@ -57,6 +58,7 @@ class OrdreAchat(BaseModel):
     action_id: int
     prix_achat: int
     date_achat: str
+    
 class UserRegister(BaseModel):
     nom:str
     prenom:str
@@ -66,7 +68,20 @@ class UserRegister(BaseModel):
 @app.post("/ordre_d_achat")
 def create_ordre_d_achat(ordre: OrdreAchat):
     ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat, ordre.date_achat)
-    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat, "date_achat": ordre.date_achat}@app.post("/api/auth/inscription")
+    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat, "date_achat": ordre.date_achat}
+
+
+
+@app.put("/ordre_de_vente")
+def create_ordre_de_vente(id, prix_vente,req:Request):
+    try:
+        decoder_token(req.headers["Authorization"])
+        ordre_vente(id,prix_vente)
+        return {"action_id": id, "prix_vente":prix_vente}
+    except:
+        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+
+@app.post("/api/auth/inscription")
 async def inscription(user:UserRegister):
     if len(get_users_by_mail(user.email)) > 0:
         raise HTTPException(status_code=403, detail="L'email fourni possède déjà un compte")
