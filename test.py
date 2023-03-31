@@ -103,28 +103,29 @@ async def inscription(user:UserRegister):
         return {"token" : token}
 # - Une action
 
-class Action(BaseModel):
-    entreprise: str
-    prix: int
+# class Action(BaseModel):
+#     entreprise: str
+#     prix: int
     
-@app.post("/create_action")
-def create_action(action : Action):
-    Actions(action.entreprise, action.prix)
-    return {"entreprise": action.entreprise, "prix": action.prix}
+# @app.post("/create_action")
+# def create_action(action : Action):
+#     Actions(action.entreprise, action.prix)
+#     return {"entreprise": action.entreprise, "prix": action.prix}
 
 # - Une ligne dans le registre
 
 class OrdreAchat(BaseModel):
-    utilisateur_id: int
     action_id: int
     prix_achat: int
     
 
 
 @app.post("/ordre_d_achat")
-def create_ordre_d_achat(ordre: OrdreAchat):
-    ordre_d_achat(ordre.utilisateur_id, ordre.action_id, ordre.prix_achat)
-    return {"utilisateur_id": ordre.utilisateur_id, "action_id": ordre.action_id, "prix_achat": ordre.prix_achat}
+def create_ordre_d_achat(ordre: OrdreAchat, req:Request):
+    decode = decoder_token(req.headers["Authorization"])
+    utilisateur_id = decode["id"]
+    ordre_d_achat(utilisateur_id, ordre.action_id, ordre.prix_achat)
+    return {"action_id": ordre.action_id, "prix_achat": ordre.prix_achat}
 
 # - Permet a un utilisateur d’en suivre un autre 
 
@@ -187,13 +188,19 @@ class OrdreVente(BaseModel):
     prix_vente:int 
     
 @app.put("/ordre_de_vente/")
-def create_ordre_de_vente(ordre:OrdreVente ,req:Request):
+def create_ordre_de_vente(ordre: OrdreVente, req: Request):
     try:
-        decoder_token(req.headers["Authorization"])
-        ordre_vente(ordre.id,ordre.prix_vente)
-        return {"action_id": ordre.id, "prix_vente":ordre.prix_vente}
+        decode = decoder_token(req.headers["Authorization"])
+        utilisateur_id = decode['id']
+        # call the ordre_vente function with the correct arguments
+        vente = ordre_vente(ordre.id, utilisateur_id, ordre.prix_vente)
+        return {"vente": vente}
+    
     except:
-        raise HTTPException(status_code=401, detail="Vous devez être identifiés pour accéder à cet endpoint")
+        raise HTTPException(status_code=401, detail="Vous devez être identifié pour accéder à cet endpoint.")
+
+
+
     
 
 # Delete :

@@ -29,7 +29,7 @@ def obtenir_jwt_depuis_email_mdp(email:str, mdp:str):
 def Action_par_personne(id):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
-    curseur.execute("""SELECT Actions.entreprise, Actions.prix FROM Actions 
+    curseur.execute("""SELECT Actions.entreprise, Actions.prix, Associations_actions_utilisateurs.id FROM Actions
                     INNER JOIN Associations_actions_utilisateurs ON Actions.id = Associations_actions_utilisateurs.action_id
                     INNER JOIN Utilisateurs ON Associations_actions_utilisateurs.utilisateur_id = Utilisateurs.id
                     WHERE Utilisateurs.id = ?""", (id,))
@@ -167,11 +167,19 @@ def update_token(id, token:str)->None:
 
 # - vendre une action 
 
-def ordre_vente(id , prix_vente):
+def ordre_vente(id, utilisateur_id, prix_vente):
     connexion = sqlite3.connect('base.db')
     curseur = connexion.cursor()
-    curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? """, (prix_vente, datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S") , id))
-    connexion.commit()
+    asso = curseur.execute("""SELECT action_id FROM Associations_actions_utilisateurs WHERE id = ? AND utilisateur_id = ?""",(id, utilisateur_id))
+    if asso.fetchone() is not None:
+        curseur.execute("""UPDATE Associations_actions_utilisateurs SET prix_vente = ?, date_vente = ? WHERE id = ? AND utilisateur_id = ?""",
+                        (prix_vente, datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S"), id, utilisateur_id))
+        connexion.commit()
+        connexion.close()
+        return('vente ok')
+    else : 
+        return ('cette action ne vous appartient pas')
+
 
 # Changer la valeur d’une action (fonction prix)
 
